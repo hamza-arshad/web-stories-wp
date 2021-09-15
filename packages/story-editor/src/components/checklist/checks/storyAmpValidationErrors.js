@@ -18,6 +18,7 @@
  */
 import { trackEvent } from '@web-stories-wp/tracking';
 import { useEffect, useRef, useState } from '@web-stories-wp/react';
+import worker from 'workerize-loader';
 
 /**
  * Internal dependencies
@@ -27,7 +28,11 @@ import { ChecklistCard, DefaultFooterText } from '../../checklistCard';
 import { PRIORITY_COPY } from '../constants';
 import { useRegisterCheck } from '../countContext';
 
+const instance = worker();
+
 export async function getStoryAmpValidationErrors({ link, status }) {
+  console.log({ link, status });
+  console.log({ instance });
   if (!link || !['publish', 'future'].includes(status)) {
     return false;
   }
@@ -35,9 +40,19 @@ export async function getStoryAmpValidationErrors({ link, status }) {
   try {
     const response = await fetch(link);
     const storyMarkup = await response.text();
-    const { status: markupStatus, errors } =
-      window.amp.validator.validateString(storyMarkup);
 
+    // const amphtmlValidator = await import(
+    //   /* webpackChunkName: "amphtml-validator" */ 'amphtml-validator'
+    // );
+    // instance.amphtmlValidator.getInstance().then((validator) => {
+    //   const result = validator.validateString(storyMarkup);
+    //   console.log({ result });
+    // });
+
+    const { status: markupStatus, errors } = {
+      errors: false,
+      status: 'something whatever',
+    };
     if ('FAIL' !== markupStatus) {
       return false;
     }
