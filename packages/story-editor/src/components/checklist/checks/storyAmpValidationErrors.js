@@ -18,7 +18,6 @@
  */
 import { trackEvent } from '@web-stories-wp/tracking';
 import { useEffect, useRef, useState } from '@web-stories-wp/react';
-import worker from 'workerize-loader';
 
 /**
  * Internal dependencies
@@ -27,66 +26,9 @@ import { useStory } from '../../../app';
 import { ChecklistCard, DefaultFooterText } from '../../checklistCard';
 import { PRIORITY_COPY } from '../constants';
 import { useRegisterCheck } from '../countContext';
+import { getStoryAmpValidationErrors } from '../ampValidationErrors/getStoryAmpValidationErrors';
 
-const instance = worker();
-
-export async function getStoryAmpValidationErrors({ link, status }) {
-  console.log({ link, status });
-  console.log({ instance });
-  if (!link || !['publish', 'future'].includes(status)) {
-    return false;
-  }
-
-  try {
-    const response = await fetch(link);
-    const storyMarkup = await response.text();
-
-    // const amphtmlValidator = await import(
-    //   /* webpackChunkName: "amphtml-validator" */ 'amphtml-validator'
-    // );
-    // instance.amphtmlValidator.getInstance().then((validator) => {
-    //   const result = validator.validateString(storyMarkup);
-    //   console.log({ result });
-    // });
-
-    const { status: markupStatus, errors } = {
-      errors: false,
-      status: 'something whatever',
-    };
-    if ('FAIL' !== markupStatus) {
-      return false;
-    }
-
-    const filteredErrors = errors
-      .filter(({ severity }) => severity === 'ERROR')
-      .filter(({ code, params }) => {
-        // Filter out errors that are covered in other checks
-        // Already covered by metadata checks.
-
-        // Missing story poster
-        if ('MISSING_URL' === code && params?.[0].startsWith('poster')) {
-          return false;
-        }
-
-        // Missing publisher logo
-        if (
-          'MISSING_URL' === code &&
-          params?.[0].startsWith('publisher-logo')
-        ) {
-          return false;
-        }
-        // Missing video posters
-        if ('INVALID_URL_PROTOCOL' === code && params?.[0].startsWith('src')) {
-          return false;
-        }
-
-        return true;
-      });
-    return filteredErrors.length > 0;
-  } catch {
-    return false;
-  }
-}
+import(/* webpackChunkName: "fs" */ 'fs');
 
 const StoryAmpValidationErrors = () => {
   // ampValidationErrorRef is making sure that tracking is only fired once per session.
