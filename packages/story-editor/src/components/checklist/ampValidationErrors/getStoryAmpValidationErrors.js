@@ -16,25 +16,23 @@
 /**
  * Internal dependencies
  */
-import { validatorWorker } from './worker';
-
-import(/* webpackChunkName: "fs" */ 'fs');
+import Worker from './worker';
 
 export async function getStoryAmpValidationErrors({ link, status }) {
   if (!link || !['publish', 'future'].includes(status)) {
     return false;
   }
 
+  const worker = new Worker();
+
   try {
     const response = await fetch(link);
     const storyMarkup = await response.text();
 
-    const result = await validatorWorker.validator().then((validator) => {
-      return validator.validateString(storyMarkup);
-    });
+    await worker.postMessage({}, storyMarkup);
 
     // TODO update error handling to new format with integers
-    const { status: markupStatus, errors } = result;
+    const { status: markupStatus, errors } = false;
     if ('FAIL' !== markupStatus) {
       return false;
     }

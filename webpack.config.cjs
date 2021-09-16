@@ -67,7 +67,6 @@ const sharedConfig = {
      * @see (@link https://webpack.js.org/configuration/output/#outputjsonpfunction)
      */
     jsonpFunction: '__webStories_webpackJsonp',
-    globalObject: 'this', // unclear if this will stop getting asked for once other issues are resolved.
   },
   module: {
     rules: [
@@ -75,6 +74,13 @@ const sharedConfig = {
         test: /\.js$/,
         use: ['source-map-loader'],
         enforce: 'pre',
+      },
+      {
+        test: /\.worker\.(c|m)?js$/i,
+        loader: 'worker-loader',
+        options: {
+          esModule: false,
+        },
       },
       {
         test: /\.js$/,

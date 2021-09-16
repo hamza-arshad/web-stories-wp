@@ -28,8 +28,6 @@ import { PRIORITY_COPY } from '../constants';
 import { useRegisterCheck } from '../countContext';
 import { getStoryAmpValidationErrors } from '../ampValidationErrors/getStoryAmpValidationErrors';
 
-import(/* webpackChunkName: "fs" */ 'fs');
-
 const StoryAmpValidationErrors = () => {
   // ampValidationErrorRef is making sure that tracking is only fired once per session.
   const ampValidationErrorsRef = useRef();

@@ -13,12 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * External dependencies
- */
-import validator from 'workerize-loader!./validator';
-import(/* webpackChunkName: "fs" */ 'fs');
 
-const validatorWorker = validator();
+const getValidator = async (markup) => {
+  const validator = await import(
+    /* webpackChunkName: "validator-wasm" */
+    'https://cdn.ampproject.org/v0/validator_wasm.js'
+  )
+    .then((module) => {
+      console.log('module: ', { module });
+      return module;
+    })
+    .catch((err) => {
+      console.log('bummer ', err);
+    });
 
-export { validatorWorker };
+  console.log({ validator });
+  return validator().validateString(markup);
+};
+
+const onmessage = function (event, markup = '') {
+  console.log('worker on message: ', { event, markup });
+
+  const results = getValidator(markup);
+
+  postMessage(results);
+};
+
+export default onmessage;
